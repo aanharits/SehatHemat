@@ -19,7 +19,6 @@ export async function POST(request: Request) {
     }
 
     // Ambil data bahan makanan dari database menggunakan Prisma
-    // dan tangani kemungkinan error dari call database.
     let ingredientsData;
     try {
       ingredientsData = await prisma.ingridients.findMany();
@@ -71,7 +70,7 @@ Struktur Output JSON yang diharapkan:
     // Parse ke JSON untuk memastikan frontend menerima format objek, bukan sekedar string json
     const mealPlan = JSON.parse(responseText);
     return NextResponse.json({ result: mealPlan }, { status: 200 });
-    
+
   } catch (error: any) {
     console.error("Gemini API Error:", error);
     return NextResponse.json(
