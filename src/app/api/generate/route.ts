@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import prisma from "@/lib/prisma";
 
-const apiKey = process.env.GEMINI_API_KEY || "";
-const genAI = new GoogleGenerativeAI(apiKey);
+const groqApiKey = process.env.GROQ_API_KEY || "";
+const groq = new Groq({ apiKey: groqApiKey });
 
 export async function POST(request: Request) {
   try {
@@ -40,39 +40,37 @@ export async function POST(request: Request) {
 
 Buat rencana makan mingguan (Senin-Minggu) berdasarkan budget, target protein, dan kalori yang dikirim user.
 
-ATURAN KERAS: Kamu HANYA boleh menggunakan bahan makanan dan harga yang ada di daftar database yang saya berikan. Jangan mengarang harga sendiri.
+ATURAN KERAS: 
+1. Kamu HANYA boleh menggunakan bahan makanan dan harga yang ada di daftar database yang saya berikan.
+2. Buatlah menu yang SANGAT BERVARIASI setiap hari dan setiap waktu makan. Jangan hanya menggunakan telur dan tempe terus-menerus.
+3. Total harga harian tidak boleh melebihi budget mingguan yang dibagi 7.
+4. JANGAN gunakan tag markdown seperti \`\`\`json. Langsung mulai dengan karakter '{'.
 
 Daftar bahan makanan:
 ${ingredientsJson}
 
-Hitung total harga harian dan pastikan tidak melebihi budget mingguan yang dibagi 7.
-
-Output harus berupa JSON MURNI agar bisa langsung diparsing oleh frontend.
 Struktur Output JSON yang diharapkan:
 { "weekly_plan": [ { "day": "Monday", "meals": { "breakfast": { "menu": "...", "price": 0 }, "lunch": { "menu": "...", "price": 0 }, "dinner": { "menu": "...", "price": 0 } }, "total_protein": 0, "total_calories": 0, "daily_cost": 0 } ] }`;
 
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      systemInstruction,
-      generationConfig: {
-        responseMimeType: "application/json"
-      }
+    const userPrompt = `Buatkan meal plan mingguan dengan budget mingguan: ${budget}, target protein per hari: ${targetProtein}g, target kalori per hari: ${targetCalories}kcal. Batasan diet: ${dietaryRestrictions || "Tidak ada"}. Output wajib berupa JSON murni tanpa markdown!`;
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: "system", content: systemInstruction },
+        { role: "user", content: userPrompt }
+      ],
+      model: "llama-3.3-70b-versatile",
+      response_format: { type: "json_object" },
     });
 
-    const userPrompt = `Buatkan meal plan mingguan dengan budget mingguan: ${budget}, target protein per hari: ${targetProtein}g, target kalori per hari: ${targetCalories}kcal. Batasan diet tambahan: ${dietaryRestrictions || "Tidak ada"}`;
-
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-    });
-
-    const responseText = result.response.text();
+    const responseText = chatCompletion.choices[0]?.message?.content || "{}";
     
     // Parse ke JSON untuk memastikan frontend menerima format objek, bukan sekedar string json
     const mealPlan = JSON.parse(responseText);
     return NextResponse.json({ result: mealPlan }, { status: 200 });
 
   } catch (error: any) {
-    console.error("Gemini API Error:", error);
+    console.error("Groq API Error:", error);
     return NextResponse.json(
       { error: "Gagal menghasilkan meal plan.", details: error.message },
       { status: 500 }
