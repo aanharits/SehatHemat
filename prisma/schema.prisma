@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ingridients {
+  id       BigInt  @id
+  name     String?
+  category String?
+  price    BigInt?
+  protein  Float?
+  calories BigInt?
+  unit     String?
+}
