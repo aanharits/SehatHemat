@@ -8,7 +8,7 @@ const groq = new Groq({ apiKey: groqApiKey });
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { budget, targetProtein, targetCalories, dietaryRestrictions } = body;
+    const { budget, targetProtein, targetCalories } = body;
 
     // Check required inputs
     if (!budget || !targetProtein || !targetCalories) {
@@ -23,7 +23,6 @@ export async function POST(request: Request) {
     try {
       ingredientsData = await prisma.ingridients.findMany();
     } catch (dbError: any) {
-      console.error("Database Fetch Error:", dbError);
       return NextResponse.json(
         { error: "Gagal mengambil data bahan makanan dari database", details: dbError.message },
         { status: 500 }
@@ -52,7 +51,7 @@ ${ingredientsJson}
 Struktur Output JSON yang diharapkan:
 { "weekly_plan": [ { "day": "Monday", "meals": { "breakfast": { "menu": "...", "price": 0 }, "lunch": { "menu": "...", "price": 0 }, "dinner": { "menu": "...", "price": 0 } }, "total_protein": 0, "total_calories": 0, "daily_cost": 0 } ] }`;
 
-    const userPrompt = `Buatkan meal plan mingguan dengan budget mingguan: ${budget}, target protein per hari: ${targetProtein}g, target kalori per hari: ${targetCalories}kcal. Batasan diet: ${dietaryRestrictions || "Tidak ada"}. Output wajib berupa JSON murni tanpa markdown!`;
+    const userPrompt = `Buatkan meal plan mingguan dengan budget mingguan: ${budget}, target protein per hari: ${targetProtein}g, target kalori per hari}. Output wajib berupa JSON murni tanpa markdown!`;
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [
@@ -70,7 +69,6 @@ Struktur Output JSON yang diharapkan:
     return NextResponse.json({ result: mealPlan }, { status: 200 });
 
   } catch (error: any) {
-    console.error("Groq API Error:", error);
     return NextResponse.json(
       { error: "Gagal menghasilkan meal plan.", details: error.message },
       { status: 500 }
