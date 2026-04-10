@@ -35,23 +35,44 @@ export async function POST(request: Request) {
     );
 
     // Persiapkan Strict System Prompt
-    const systemInstruction = `Kamu adalah ahli gizi dan perencana keuangan fitness.
+    const systemInstruction = `You are an expert Dietitian and strict Financial Planner. Your task is to create a 7-day meal plan (Monday to Sunday) based ONLY on the provided ingredient list.
 
-Buat rencana makan mingguan (Senin-Minggu) berdasarkan budget, target protein, dan kalori yang dikirim user.
+[USER TARGETS]
+Weekly Budget: Rp ${budget}
+Daily Calories Target: ${targetCalories} kcal (Allowable range: +/- 50 kcal)
+Daily Protein Target: ${targetProtein} g (Allowable range: +/- 5 g)
 
-ATURAN KERAS: 
-1. Kamu HANYA boleh menggunakan bahan makanan dan harga yang ada di daftar database yang saya berikan.
-2. Buatlah menu yang SANGAT BERVARIASI setiap hari dan setiap waktu makan. Jangan hanya menggunakan telur dan tempe terus-menerus.
-3. Total harga harian tidak boleh melebihi budget mingguan yang dibagi 7.
-4. JANGAN gunakan tag markdown seperti \`\`\`json. Langsung mulai dengan karakter '{'.
+[STRICT RULES]
+1. BUDGET LIMIT: The total sum of 'daily_cost' for all 7 days MUST NOT exceed the Weekly Budget. 
+   To achieve this, your absolute maximum limit per day is Rp ${budget / 7}. Do not exceed this daily limit under any circumstances.
+2. NUTRITION ACCURACY: The 'total_calories' and 'total_protein' for each day must closely match the user targets within the allowable range.
+3. INVENTORY ONLY: You must ONLY use the ingredients, exact prices, and exact nutritional values provided in the [DATABASE] below. Do not invent or estimate any values.
+4. CALCULATION: Double-check your math before generating the output. Ensure (Breakfast Price + Lunch Price + Dinner Price) = daily_cost.
 
-Daftar bahan makanan:
+[DATABASE]
 ${ingredientsJson}
 
-Struktur Output JSON yang diharapkan:
-{ "weekly_plan": [ { "day": "Monday", "meals": { "breakfast": { "menu": "...", "price": 0 }, "lunch": { "menu": "...", "price": 0 }, "dinner": { "menu": "...", "price": 0 } }, "total_protein": 0, "total_calories": 0, "daily_cost": 0 } ] }`;
+[OUTPUT FORMAT]
+You must respond ONLY with a valid, raw JSON object. Do not include markdown formatting like \`\`\`json or any explanation text. Use this exact schema:
+{
+  "result": {
+    "weekly_plan": [
+      {
+        "day": "Monday",
+        "meals": {
+          "breakfast": { "menu": "...", "price": 0 },
+          "lunch": { "menu": "...", "price": 0 },
+          "dinner": { "menu": "...", "price": 0 }
+        },
+        "total_protein": 0,
+        "total_calories": 0,
+        "daily_cost": 0
+      }
+    ]
+  }
+}`;
 
-    const userPrompt = `Buatkan meal plan mingguan dengan budget mingguan: ${budget}, target protein per hari: ${targetProtein}g, target kalori per hari}. Output wajib berupa JSON murni tanpa markdown!`;
+    const userPrompt = `Please generate the 7-day meal plan based on the provided instructions. Output only valid JSON.`;
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [
@@ -66,7 +87,10 @@ Struktur Output JSON yang diharapkan:
     
     // Parse ke JSON untuk memastikan frontend menerima format objek, bukan sekedar string json
     const mealPlan = JSON.parse(responseText);
-    return NextResponse.json({ result: mealPlan }, { status: 200 });
+    
+    // To match the payload structure frontend expects
+    const finalResponse = mealPlan.result ? mealPlan : { result: mealPlan };
+    return NextResponse.json(finalResponse, { status: 200 });
 
   } catch (error: any) {
     return NextResponse.json(
