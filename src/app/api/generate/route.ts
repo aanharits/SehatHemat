@@ -93,8 +93,21 @@ You must respond ONLY with a valid, raw JSON object. Do not include markdown for
     return NextResponse.json(finalResponse, { status: 200 });
 
   } catch (error: any) {
+    const msg = error.message || "";
+
+    // Detect Groq rate limit errors
+    if (msg.includes("rate_limit") || msg.includes("Rate limit") || msg.includes("429")) {
+      return NextResponse.json(
+        {
+          error: "API rate limit reached. The free tier daily token limit has been exceeded. Please try again in about 1 hour.",
+          details: msg,
+        },
+        { status: 429 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Gagal menghasilkan meal plan.", details: error.message },
+      { error: "Gagal menghasilkan meal plan.", details: msg },
       { status: 500 }
     );
   }
