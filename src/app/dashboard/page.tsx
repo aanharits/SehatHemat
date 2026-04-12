@@ -1,27 +1,62 @@
 "use client"
 
 import * as React from "react"
-import { AlertCircle, Utensils } from "lucide-react"
+import { AlertCircle, Utensils, Check, X } from "lucide-react"
 import { MealPlannerForm, type UserTargets } from "@/components/meal-planner-form"
 import { SummaryStats } from "@/components/summary-stats"
-import { WeeklyPlanResult } from "@/components/weekly-plan-result"
-
-interface MealPlanDay {
-  day: string
-  meals: {
-    breakfast: { menu: string; price: number }
-    lunch: { menu: string; price: number }
-    dinner: { menu: string; price: number }
-  }
-  total_protein: number
-  total_calories: number
-  daily_cost: number
-}
+import { WeeklyPlanResult, type MealPlanDay } from "@/components/weekly-plan-result"
 
 interface MealPlanResponse {
   result: {
     weekly_plan: MealPlanDay[]
   }
+}
+
+// ─── Toast Notification Component ───
+function Toast({
+  message,
+  type,
+  onClose,
+}: {
+  message: string
+  type: "success" | "error"
+  onClose: () => void
+}) {
+  React.useEffect(() => {
+    const timer = setTimeout(onClose, 4000)
+    return () => clearTimeout(timer)
+  }, [onClose])
+
+  return (
+    <div
+      className={`
+        fixed bottom-6 right-6 z-50 flex items-center gap-3
+        px-5 py-3.5 rounded-xl shadow-lg
+        animate-fade-in-up
+        ${
+          type === "success"
+            ? "bg-[var(--accent-900)] text-white"
+            : "bg-red-600 text-white"
+        }
+      `}
+      style={{ animationDuration: "0.3s" }}
+    >
+      <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0 bg-white/15">
+        {type === "success" ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <X className="h-4 w-4" />
+        )}
+      </div>
+      <p className="text-[13px] font-medium">{message}</p>
+      <button
+        onClick={onClose}
+        className="ml-2 p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  )
 }
 
 export default function DashboardPage() {
@@ -30,11 +65,21 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
+  // Per-day save state
+  const [savingDay, setSavingDay] = React.useState<string | null>(null)
+  const [savedDays, setSavedDays] = React.useState<Set<string>>(new Set())
+  const [toast, setToast] = React.useState<{
+    message: string
+    type: "success" | "error"
+  } | null>(null)
+
   const handleGenerate = async (targets: UserTargets) => {
     setIsLoading(true)
     setError(null)
     setMealPlan(null)
     setUserTargets(targets)
+    // Reset saved days on new generation
+    setSavedDays(new Set())
 
     try {
       const response = await fetch("/api/generate", {
@@ -67,8 +112,52 @@ export default function DashboardPage() {
     }
   }
 
+  const handleSaveDay = async (day: MealPlanDay) => {
+    if (!userTargets || savingDay) return
+
+    setSavingDay(day.day)
+    try {
+      const response = await fetch("/api/meal-plans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dayName: day.day,
+          meals: day.meals,
+          totalProtein: day.total_protein,
+          totalCalories: day.total_calories,
+          dailyCost: day.daily_cost,
+        }),
+      })
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}))
+        throw new Error(errData.error || "Failed to save")
+      }
+
+      setSavedDays((prev) => new Set(prev).add(day.day))
+      setToast({
+        message: `${day.day}'s menu saved to favourites!`,
+        type: "success",
+      })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to save"
+      setToast({ message, type: "error" })
+    } finally {
+      setSavingDay(null)
+    }
+  }
+
   return (
     <div className="space-y-8">
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* Form Container */}
       <div className="animate-fade-in-up stagger-1">
         <div className="glass-card-static p-5">
@@ -127,7 +216,12 @@ export default function DashboardPage() {
             targetCalories={userTargets.targetCalories}
             targetProtein={userTargets.targetProtein}
           />
-          <WeeklyPlanResult weeklyPlan={mealPlan} />
+          <WeeklyPlanResult
+            weeklyPlan={mealPlan}
+            onSaveDay={handleSaveDay}
+            savingDay={savingDay}
+            savedDays={savedDays}
+          />
         </div>
       )}
 
