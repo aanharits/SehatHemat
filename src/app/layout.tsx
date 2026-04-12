@@ -16,7 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SehatHemat — Smart Meal Planning",
+  title: "SehatHemat",
   description:
     "AI-powered weekly meal planner that fits your budget and nutrition goals. Plan healthy meals without breaking the bank.",
 };
