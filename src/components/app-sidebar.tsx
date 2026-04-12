@@ -1,79 +1,147 @@
 "use client"
 
 import * as React from "react"
-import { Apple, LayoutDashboard, Settings, Utensils, Wallet } from "lucide-react"
-
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-} from "@/components/ui/sidebar"
+  Apple,
+  LayoutDashboard,
+  Utensils,
+  ChevronLeft,
+  Menu,
+} from "lucide-react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 
-// Menu items
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      title: "Meal Plans",
-      url: "#",
-      icon: Utensils,
-    },
-    {
-      title: "Ingredients",
-      url: "#",
-      icon: Apple,
-    },
-    {
-      title: "Budget",
-      url: "#",
-      icon: Wallet,
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
-    },
-  ],
+const menuItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Meal Plans", url: "/dashboard/meal-plans", icon: Utensils },
+  { title: "Ingredients", url: "/dashboard/ingredients", icon: Apple },
+]
+
+export function AppSidebar({
+  collapsed,
+  onToggle,
+}: {
+  collapsed: boolean
+  onToggle: () => void
+}) {
+  const pathname = usePathname()
+
+  return (
+    <aside
+      className={`
+        fixed top-0 left-0 h-screen z-30
+        flex flex-col
+        bg-white border-r border-[var(--border-subtle)]
+        transition-all duration-300 ease-[var(--ease-out)]
+        ${collapsed ? "w-[72px]" : "w-[260px]"}
+      `}
+    >
+      {/* Logo Header */}
+      <div className="h-16 flex items-center gap-3 px-5 border-b border-[var(--border-subtle)] shrink-0">
+        <div
+          className="
+            flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
+            bg-gradient-to-br from-[var(--accent-700)] to-[var(--accent-950)]
+            shadow-[var(--shadow-xs)]
+          "
+        >
+          <Utensils className="h-4 w-4 text-white" />
+        </div>
+        <span
+          className={`
+            text-[16px] font-bold tracking-tight text-[var(--text-primary)]
+            transition-all duration-300
+            ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"}
+          `}
+        >
+          SehatHemat
+        </span>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-5 space-y-1 overflow-hidden">
+        <p
+          className={`
+            px-3 mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]
+            transition-all duration-300
+            ${collapsed ? "opacity-0" : "opacity-100"}
+          `}
+        >
+          Menu
+        </p>
+        {menuItems.map((item) => {
+          const isActive = pathname === item.url
+          return (
+            <Link
+              key={item.title}
+              href={item.url}
+              className={`
+                group flex items-center gap-3 px-3 h-11 rounded-xl
+                transition-all duration-200 ease-[var(--ease-out)]
+                relative overflow-hidden
+                ${collapsed ? "justify-center" : ""}
+                ${
+                  isActive
+                    ? "bg-gradient-to-r from-[var(--accent-800)] to-[var(--accent-950)] text-white shadow-[var(--shadow-xs)]"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--accent-50)] hover:text-[var(--accent-900)]"
+                }
+              `}
+            >
+              <item.icon className={`h-[18px] w-[18px] shrink-0 ${isActive ? "text-white" : ""}`} />
+              <span
+                className={`
+                  text-[14px] font-medium whitespace-nowrap
+                  transition-all duration-300
+                  ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"}
+                `}
+              >
+                {item.title}
+              </span>
+              {/* Active glow */}
+              {isActive && (
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/5 to-transparent pointer-events-none" />
+              )}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* Collapse Toggle */}
+      <div className="px-3 pb-5 shrink-0">
+        <button
+          onClick={onToggle}
+          className="
+            flex items-center justify-center w-full h-10 rounded-xl
+            text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]
+            hover:bg-[var(--bg-input)]
+            transition-all duration-200 cursor-pointer
+          "
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <ChevronLeft
+            className={`h-4 w-4 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
+          />
+        </button>
+      </div>
+    </aside>
+  )
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+/* Mobile sidebar toggle button */
+export function MobileSidebarTrigger({ onClick }: { onClick: () => void }) {
   return (
-    <Sidebar {...props}>
-      <SidebarHeader className="flex h-14 items-center gap-2 border-b px-4">
-        <Utensils className="h-6 w-6 text-green-600" />
-        <span className="text-lg font-bold">SehatHemat</span>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {data.navMain.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarRail />
-    </Sidebar>
+    <button
+      onClick={onClick}
+      className="
+        lg:hidden flex items-center justify-center
+        h-9 w-9 rounded-xl
+        text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]
+        hover:bg-[var(--bg-input)]
+        transition-all duration-200 cursor-pointer
+      "
+      aria-label="Toggle sidebar"
+    >
+      <Menu className="h-5 w-5" />
+    </button>
   )
 }
