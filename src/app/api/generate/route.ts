@@ -79,7 +79,7 @@ You must respond ONLY with a valid, raw JSON object. Do not include markdown for
         { role: "system", content: systemInstruction },
         { role: "user", content: userPrompt }
       ],
-      model: "llama-3.3-70b-versatile",
+      model: "llama-3.1-8b-instant",
       response_format: { type: "json_object" },
     });
 
