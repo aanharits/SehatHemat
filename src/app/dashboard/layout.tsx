@@ -20,7 +20,7 @@ export default function DashboardLayout({
     title = "Ingredients"
     desc = "Browse and manage your ingredients database."
   } else if (pathname === "/dashboard/meal-plans") {
-    title = "Meal Plans"
+    title = "Favourite Meal Plans"
     desc = "View and manage your saved weekly meal plans."
   }
 
@@ -58,7 +58,7 @@ export default function DashboardLayout({
         `}
       >
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 px-6 lg:px-10 bg-[var(--bg-primary)]/80 backdrop-blur-lg border-b border-[var(--border-subtle)]">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 px-6 lg:px-10 bg-white/40 backdrop-blur-xl border-b border-white/30">
           <MobileSidebarTrigger onClick={() => setMobileOpen(true)} />
           <div className="flex items-center gap-3">
             <h1 className="text-[17px] font-bold text-[var(--text-primary)]">{title}</h1>
