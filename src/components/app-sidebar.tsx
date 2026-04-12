@@ -13,7 +13,7 @@ import Link from "next/link"
 
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Meal Plans", url: "/dashboard/meal-plans", icon: Utensils },
+  { title: "Favourite Meal Plans", url: "/dashboard/meal-plans", icon: Utensils },
   { title: "Ingredients", url: "/dashboard/ingredients", icon: Apple },
 ]
 
@@ -31,13 +31,13 @@ export function AppSidebar({
       className={`
         fixed top-0 left-0 h-screen z-30
         flex flex-col
-        bg-white border-r border-[var(--border-subtle)]
+        bg-white/60 backdrop-blur-xl border-r border-white/40
         transition-all duration-300 ease-[var(--ease-out)]
         ${collapsed ? "w-[72px]" : "w-[260px]"}
       `}
     >
       {/* Logo Header */}
-      <div className="h-16 flex items-center gap-3 px-5 border-b border-[var(--border-subtle)] shrink-0">
+      <div className="h-16 flex items-center gap-3 px-5 border-b border-white/30 shrink-0">
         <div
           className="
             flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
@@ -105,24 +105,6 @@ export function AppSidebar({
           )
         })}
       </nav>
-
-      {/* Collapse Toggle */}
-      <div className="px-3 pb-5 shrink-0">
-        <button
-          onClick={onToggle}
-          className="
-            flex items-center justify-center w-full h-10 rounded-xl
-            text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]
-            hover:bg-[var(--bg-input)]
-            transition-all duration-200 cursor-pointer
-          "
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <ChevronLeft
-            className={`h-4 w-4 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
-          />
-        </button>
-      </div>
     </aside>
   )
 }
