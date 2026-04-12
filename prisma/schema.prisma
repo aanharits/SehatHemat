@@ -16,3 +16,15 @@ model ingridients {
   calories BigInt?
   unit     String?
 }
+
+model SavedMealPlan {
+  id             String   @id @default(cuid())
+  dayName        String
+  meals          Json     // { breakfast: { menu, price }, lunch: { menu, price }, dinner: { menu, price } }
+  totalProtein   Float
+  totalCalories  Float
+  dailyCost      Float
+  createdAt      DateTime @default(now())
+
+  @@map("saved_meal_plans")
+}
