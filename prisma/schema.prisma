@@ -17,14 +17,46 @@ model ingridients {
   unit     String?
 }
 
-model SavedMealPlan {
+model User {
+  id          String   @id @db.Uuid
+  email       String   @unique
+  displayName String?
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  savedMealPlans SavedMealPlan[]
+  activeMealPlan ActiveMealPlan?
+
+  @@map("users")
+}
+
+model ActiveMealPlan {
   id             String   @id @default(cuid())
-  dayName        String
-  meals          Json     // { breakfast: { menu, price }, lunch: { menu, price }, dinner: { menu, price } }
-  totalProtein   Float
-  totalCalories  Float
-  dailyCost      Float
+  userId         String   @unique @db.Uuid
+  weeklyPlan     Json
+  budget         Float
+  targetCalories Float
+  targetProtein  Float
   createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("active_meal_plans")
+}
+
+model SavedMealPlan {
+  id            String   @id @default(cuid())
+  userId        String   @db.Uuid
+  dayName       String
+  meals         Json
+  totalProtein  Float
+  totalCalories Float
+  dailyCost     Float
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("saved_meal_plans")
 }
