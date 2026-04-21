@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
-// ─── GET all saved meal days (newest first) ───
+// ─── GET all saved meal days for the current user (newest first) ───
 export async function GET() {
   try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const plans = await prisma.savedMealPlan.findMany({
+      where: { userId: user.id },
       orderBy: { createdAt: "desc" },
     });
 
@@ -19,6 +30,15 @@ export async function GET() {
 // ─── POST save a single day's meal plan ───
 export async function POST(request: Request) {
   try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { dayName, meals, totalProtein, totalCalories, dailyCost } = body;
 
@@ -46,6 +66,7 @@ export async function POST(request: Request) {
 
     const saved = await prisma.savedMealPlan.create({
       data: {
+        userId: user.id,
         dayName,
         meals,
         totalProtein: Number(totalProtein),
@@ -65,6 +86,15 @@ export async function POST(request: Request) {
 // ─── DELETE a saved meal ───
 export async function DELETE(request: Request) {
   try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -75,8 +105,9 @@ export async function DELETE(request: Request) {
       );
     }
 
-    await prisma.savedMealPlan.delete({
-      where: { id },
+    // Ensure the plan belongs to the current user
+    await prisma.savedMealPlan.deleteMany({
+      where: { id, userId: user.id },
     });
 
     return NextResponse.json({ success: true }, { status: 200 });
