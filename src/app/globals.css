@@ -357,3 +357,88 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(26, 46, 35, 0.25);
 }
+
+/* ─── Landing Page ─── */
+.landing-page {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(180, 220, 198, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(200, 230, 212, 0.15) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+.landing-nav {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.landing-headline {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.landing-feature-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.landing-feature-card:hover {
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+/* ─── Auth Modal ─── */
+.auth-modal-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 8px 32px rgba(13, 46, 30, 0.12),
+    0 2px 8px rgba(13, 46, 30, 0.06);
+}
+
+.auth-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.auth-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.auth-input:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.auth-input:focus {
+  border-color: var(--accent-500);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 3px rgba(62, 163, 107, 0.12);
+}
+
+.auth-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
