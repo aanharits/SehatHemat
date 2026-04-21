@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import prisma from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 const groqApiKey = process.env.GROQ_API_KEY || "";
 const groq = new Groq({ apiKey: groqApiKey });
 
 export async function POST(request: Request) {
   try {
+    // ─── Auth check ───
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { budget, targetProtein, targetCalories } = body;
 
@@ -90,6 +101,31 @@ You must respond ONLY with a valid, raw JSON object. Do not include markdown for
     
     // To match the payload structure frontend expects
     const finalResponse = mealPlan.result ? mealPlan : { result: mealPlan };
+
+    // ─── Save as ActiveMealPlan for the current user ───
+    try {
+      await prisma.activeMealPlan.upsert({
+        where: { userId: user.id },
+        update: {
+          weeklyPlan: finalResponse.result.weekly_plan,
+          budget: Number(budget),
+          targetCalories: Number(targetCalories),
+          targetProtein: Number(targetProtein),
+          updatedAt: new Date(),
+        },
+        create: {
+          userId: user.id,
+          weeklyPlan: finalResponse.result.weekly_plan,
+          budget: Number(budget),
+          targetCalories: Number(targetCalories),
+          targetProtein: Number(targetProtein),
+        },
+      });
+    } catch (saveError: any) {
+      // Non-critical: still return the plan even if save fails
+      console.error("Failed to save active meal plan:", saveError.message);
+    }
+
     return NextResponse.json(finalResponse, { status: 200 });
 
   } catch (error: any) {
