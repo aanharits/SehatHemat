@@ -5,11 +5,12 @@ import {
   Apple,
   LayoutDashboard,
   Utensils,
-  ChevronLeft,
   Menu,
+  LogOut,
 } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -17,14 +18,39 @@ const menuItems = [
   { title: "Ingredients", url: "/dashboard/ingredients", icon: Apple },
 ]
 
+interface UserInfo {
+  email: string
+  displayName?: string | null
+  avatarUrl?: string | null
+}
+
 export function AppSidebar({
   collapsed,
   onToggle,
+  user,
 }: {
   collapsed: boolean
   onToggle: () => void
+  user?: UserInfo | null
 }) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    const supabase = createSupabaseBrowserClient()
+    await supabase.auth.signOut()
+    router.push("/")
+    router.refresh()
+  }
+
+  const initials = user?.displayName
+    ? user.displayName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : user?.email?.[0]?.toUpperCase() || "?"
 
   return (
     <aside
@@ -105,6 +131,63 @@ export function AppSidebar({
           )
         })}
       </nav>
+
+      {/* User info + Logout */}
+      {user && (
+        <div className="border-t border-white/30 px-3 py-4 space-y-2">
+          <div className={`flex items-center gap-3 px-3 ${collapsed ? "justify-center" : ""}`}>
+            {/* Avatar */}
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt="Avatar"
+                className="h-8 w-8 rounded-lg object-cover shrink-0"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[var(--accent-200)] to-[var(--accent-400)]
+                flex items-center justify-center shrink-0">
+                <span className="text-[11px] font-bold text-white">{initials}</span>
+              </div>
+            )}
+            <div
+              className={`
+                min-w-0 transition-all duration-300
+                ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"}
+              `}
+            >
+              {user.displayName && (
+                <p className="text-[13px] font-semibold text-[var(--text-primary)] truncate">
+                  {user.displayName}
+                </p>
+              )}
+              <p className="text-[11px] text-[var(--text-tertiary)] truncate">
+                {user.email}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className={`
+              flex items-center gap-3 px-3 h-10 rounded-xl w-full
+              text-[var(--text-tertiary)] hover:text-red-600 hover:bg-red-50
+              transition-all duration-200 cursor-pointer
+              ${collapsed ? "justify-center" : ""}
+            `}
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span
+              className={`
+                text-[13px] font-medium whitespace-nowrap
+                transition-all duration-300
+                ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"}
+              `}
+            >
+              Keluar
+            </span>
+          </button>
+        </div>
+      )}
     </aside>
   )
 }
