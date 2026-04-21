@@ -3,6 +3,13 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import { AppSidebar, MobileSidebarTrigger } from "@/components/app-sidebar"
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
+
+interface UserInfo {
+  email: string
+  displayName?: string | null
+  avatarUrl?: string | null
+}
 
 export default function DashboardLayout({
   children,
@@ -11,7 +18,22 @@ export default function DashboardLayout({
 }) {
   const [collapsed, setCollapsed] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
+  const [user, setUser] = React.useState<UserInfo | null>(null)
   const pathname = usePathname()
+
+  // Fetch user info on mount
+  React.useEffect(() => {
+    const supabase = createSupabaseBrowserClient()
+    supabase.auth.getUser().then(({ data: { user: authUser } }) => {
+      if (authUser) {
+        setUser({
+          email: authUser.email || "",
+          displayName: authUser.user_metadata?.full_name || null,
+          avatarUrl: authUser.user_metadata?.avatar_url || null,
+        })
+      }
+    })
+  }, [])
 
   let title = "Dashboard"
   let desc = "Plan, optimize, and manage your weekly meals with ease."
@@ -31,6 +53,7 @@ export default function DashboardLayout({
         <AppSidebar
           collapsed={collapsed}
           onToggle={() => setCollapsed(!collapsed)}
+          user={user}
         />
       </div>
 
@@ -45,6 +68,7 @@ export default function DashboardLayout({
             <AppSidebar
               collapsed={false}
               onToggle={() => setMobileOpen(false)}
+              user={user}
             />
           </div>
         </>

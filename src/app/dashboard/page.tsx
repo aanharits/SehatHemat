@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { AlertCircle, Utensils, Check, X } from "lucide-react"
+import { AlertCircle, Utensils, Check, X, RefreshCw } from "lucide-react"
 import { MealPlannerForm, type UserTargets } from "@/components/meal-planner-form"
 import { SummaryStats } from "@/components/summary-stats"
 import { WeeklyPlanResult, type MealPlanDay } from "@/components/weekly-plan-result"
@@ -10,6 +10,15 @@ interface MealPlanResponse {
   result: {
     weekly_plan: MealPlanDay[]
   }
+}
+
+interface ActivePlanResponse {
+  plan: {
+    weeklyPlan: MealPlanDay[]
+    budget: number
+    targetCalories: number
+    targetProtein: number
+  } | null
 }
 
 // ─── Toast Notification Component ───
@@ -63,7 +72,9 @@ export default function DashboardPage() {
   const [mealPlan, setMealPlan] = React.useState<MealPlanDay[] | null>(null)
   const [userTargets, setUserTargets] = React.useState<UserTargets | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [isFetchingPlan, setIsFetchingPlan] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [showForm, setShowForm] = React.useState(false)
 
   // Per-day save state
   const [savingDay, setSavingDay] = React.useState<string | null>(null)
@@ -72,6 +83,36 @@ export default function DashboardPage() {
     message: string
     type: "success" | "error"
   } | null>(null)
+
+  // ─── Fetch active plan on mount ───
+  React.useEffect(() => {
+    const fetchActivePlan = async () => {
+      try {
+        const response = await fetch("/api/active-plan")
+        if (!response.ok) throw new Error("Failed to fetch")
+        const data: ActivePlanResponse = await response.json()
+
+        if (data.plan) {
+          setMealPlan(data.plan.weeklyPlan as MealPlanDay[])
+          setUserTargets({
+            budget: data.plan.budget,
+            targetCalories: data.plan.targetCalories,
+            targetProtein: data.plan.targetProtein,
+          })
+          setShowForm(false)
+        } else {
+          setShowForm(true)
+        }
+      } catch {
+        // If fetch fails, just show the form
+        setShowForm(true)
+      } finally {
+        setIsFetchingPlan(false)
+      }
+    }
+
+    fetchActivePlan()
+  }, [])
 
   const handleGenerate = async (targets: UserTargets) => {
     setIsLoading(true)
@@ -104,12 +145,26 @@ export default function DashboardPage() {
       }
 
       setMealPlan(data.result.weekly_plan)
+      setShowForm(false)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "An unexpected error occurred"
       setError(message)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleNewPlan = async () => {
+    // Clear active plan from DB
+    try {
+      await fetch("/api/active-plan", { method: "DELETE" })
+    } catch {
+      // Non-critical
+    }
+    setMealPlan(null)
+    setUserTargets(null)
+    setSavedDays(new Set())
+    setShowForm(true)
   }
 
   const handleSaveDay = async (day: MealPlanDay) => {
@@ -147,6 +202,23 @@ export default function DashboardPage() {
     }
   }
 
+  // ─── Initial loading state ───
+  if (isFetchingPlan) {
+    return (
+      <div className="space-y-10 animate-fade-in-up">
+        <div className="glass-card-static p-5 space-y-4">
+          <div className="h-5 w-32 rounded-lg animate-shimmer" />
+          <div className="h-3 w-64 rounded-full animate-shimmer" />
+          <div className="grid gap-5 sm:grid-cols-3 mt-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-12 rounded-xl animate-shimmer" />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
       {/* Toast Notification */}
@@ -158,12 +230,31 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Form Container */}
-      <div className="animate-fade-in-up stagger-1">
-        <div className="glass-card-static p-5">
-          <MealPlannerForm onGenerate={handleGenerate} isLoading={isLoading} />
+      {/* Form Container — Show if no active plan or user wants to regenerate */}
+      {showForm && (
+        <div className="animate-fade-in-up stagger-1">
+          <div className="glass-card-static p-5">
+            <MealPlannerForm onGenerate={handleGenerate} isLoading={isLoading} />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* New Plan button — shown when there IS an active plan */}
+      {mealPlan && !showForm && !isLoading && (
+        <div className="flex justify-end animate-fade-in-up">
+          <button
+            onClick={handleNewPlan}
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl
+              text-[13px] font-semibold text-[var(--text-secondary)]
+              border border-[var(--border-light)] bg-white/40 backdrop-blur-sm
+              hover:bg-white/60 hover:border-white/60 hover:shadow-[var(--shadow-sm)]
+              transition-all duration-200 cursor-pointer"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            New Plan
+          </button>
+        </div>
+      )}
 
       {/* Error */}
       {error && (
@@ -225,8 +316,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Empty State */}
-      {!mealPlan && !isLoading && !error && (
+      {/* Empty State — only when no plan and form is visible */}
+      {!mealPlan && !isLoading && !error && showForm && (
         <div className="flex flex-col items-center justify-center py-28 text-center animate-fade-in-up stagger-2">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent-100)] to-[var(--accent-50)] mb-6 animate-glow">
             <Utensils className="h-7 w-7 text-[var(--accent-600)]" />
