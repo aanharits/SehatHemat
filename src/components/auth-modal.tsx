@@ -143,7 +143,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
         >
           {/* Backdrop */}
           <motion.div
-            className="absolute inset-0 bg-[var(--accent-950)]/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-[var(--text-primary)]/40 backdrop-blur-sm"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -170,9 +170,9 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
 
             {/* Header */}
             <div className="text-center pt-8 pb-6 px-8">
-              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl
-                bg-gradient-to-br from-[var(--accent-700)] to-[var(--accent-950)] shadow-[var(--shadow-sm)] mb-4">
-                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl
+                bg-[var(--accent-400)] shadow-sm mb-4">
+                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -203,11 +203,11 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               <button
                 onClick={handleGoogleAuth}
                 disabled={isLoading}
-                className="w-full h-12 rounded-xl border border-[var(--border-light)]
-                  bg-white/60 backdrop-blur-sm
+                className="w-full h-12 rounded-full border border-[var(--border-light)]
+                  bg-white shadow-sm
                   flex items-center justify-center gap-3
                   text-[14px] font-semibold text-[var(--text-secondary)]
-                  hover:bg-white/80 hover:border-white/70 hover:shadow-[var(--shadow-sm)]
+                  hover:bg-gray-50 hover:shadow-md
                   transition-all duration-200 cursor-pointer
                   disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -310,14 +310,12 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                   </motion.p>
                 )}
 
-                {/* Submit */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 rounded-xl
-                    bg-gradient-to-r from-[var(--accent-800)] to-[var(--accent-950)]
-                    text-white text-[14px] font-semibold
-                    hover:shadow-[var(--shadow-glow),var(--shadow-md)] hover:-translate-y-0.5
+                  className="w-full h-12 rounded-full
+                    bg-[var(--text-primary)] text-white shadow-sm hover:bg-[var(--text-secondary)] font-semibold shadow-sm
+                    hover:-translate-y-0.5 hover:shadow-md
                     transition-all duration-250 ease-[var(--ease-out)]
                     disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0
                     cursor-pointer flex items-center justify-center gap-2"
