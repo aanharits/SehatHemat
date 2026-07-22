@@ -2,37 +2,38 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ─── Design Tokens — Mint Glassmorphism ─── */
+/* ─── Design Tokens — Modern Clean (Xurya Reference) ─── */
 :root {
   /* Surfaces */
-  --bg-primary: #eaf2edbf;
-  --bg-sidebar: rgba(255, 255, 255, 0.6);
-  --bg-card: rgba(255, 255, 255, 0.55);
-  --bg-card-solid: rgba(255, 255, 255, 0.75);
-  --bg-elevated: rgba(255, 255, 255, 0.85);
-  --bg-input: rgba(255, 255, 255, 0.5);
+  --bg-primary: #ffffff;
+  --bg-sidebar: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card-solid: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-input: #f8fafc;
 
   /* Text */
-  --text-primary: #1a2e23;
-  --text-secondary: #3d5a4a;
-  --text-tertiary: #7a9987;
+  --text-primary: #111111;
+  --text-secondary: #4b5563;
+  --text-tertiary: #6b7280;
   --text-inverse: #ffffff;
 
-  /* Accent — Sage / Forest */
-  --accent-50: rgba(200, 230, 212, 0.3);
-  --accent-100: rgba(180, 220, 198, 0.4);
-  --accent-200: #a3d4b5;
-  --accent-400: #5fb882;
-  --accent-500: #3ea36b;
-  --accent-600: #2d8a58;
-  --accent-700: #236e47;
-  --accent-800: #1b5839;
-  --accent-900: #14422b;
-  --accent-950: #0d2e1e;
+  /* Accent — Vibrant Spring Green */
+  --accent-50: #effdf5;
+  --accent-100: #d6fae6;
+  --accent-200: #adf2ce;
+  --accent-300: #77e5b2;
+  --accent-400: #16a56c; /* Main Accent */
+  --accent-500: #00c075;
+  --accent-600: #009b5d;
+  --accent-700: #047a4d;
+  --accent-800: #07603f;
+  --accent-900: #084f35;
+  --accent-950: #032c1d;
 
   /* Borders */
-  --border-light: rgba(255, 255, 255, 0.5);
-  --border-subtle: rgba(255, 255, 255, 0.35);
+  --border-light: #e5e7eb;
+  --border-subtle: #f3f4f6;
 
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(13, 46, 30, 0.04);
@@ -360,10 +361,7 @@
 
 /* ─── Landing Page ─── */
 .landing-page {
-  background:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(180, 220, 198, 0.25) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(200, 230, 212, 0.15) 0%, transparent 50%),
-    var(--bg-primary);
+  background: var(--bg-primary);
 }
 
 .landing-nav {
