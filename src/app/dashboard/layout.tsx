@@ -28,8 +28,8 @@ export default function DashboardLayout({
       if (authUser) {
         setUser({
           email: authUser.email || "",
-          displayName: authUser.user_metadata?.full_name || null,
-          avatarUrl: authUser.user_metadata?.avatar_url || null,
+          displayName: authUser.user_metadata?.full_name || authUser.user_metadata?.name || null,
+          avatarUrl: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || authUser.user_metadata?.avatar || null,
         })
       }
     })
