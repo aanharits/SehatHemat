@@ -246,8 +246,8 @@ export default function DashboardPage() {
             onClick={handleNewPlan}
             className="inline-flex items-center gap-2 h-10 px-5 rounded-xl
               text-[13px] font-semibold text-[var(--text-secondary)]
-              border border-[var(--border-light)] bg-white/40 backdrop-blur-sm
-              hover:bg-white/60 hover:border-white/60 hover:shadow-[var(--shadow-sm)]
+              border border-[var(--border-light)] bg-[var(--text-primary)] text-white shadow-sm 
+              hover:bg-[var(--text-secondary)] hover:shadow-[var(--shadow-sm)]
               transition-all duration-200 cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -319,8 +319,8 @@ export default function DashboardPage() {
       {/* Empty State — only when no plan and form is visible */}
       {!mealPlan && !isLoading && !error && showForm && (
         <div className="flex flex-col items-center justify-center py-28 text-center animate-fade-in-up stagger-2">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent-100)] to-[var(--accent-50)] mb-6 animate-glow">
-            <Utensils className="h-7 w-7 text-[var(--accent-600)]" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--accent-50)] mb-6">
+            <Utensils className="h-7 w-7 text-[var(--accent-400)]" />
           </div>
           <h3 className="text-[18px] font-bold text-[var(--text-primary)]">
             No meal plan yet
