@@ -1,6 +1,10 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 import {
   Apple,
   LayoutDashboard,
@@ -8,9 +12,6 @@ import {
   Menu,
   LogOut,
 } from "lucide-react"
-import { usePathname, useRouter } from "next/navigation"
-import Link from "next/link"
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -36,6 +37,8 @@ export function AppSidebar({
   const pathname = usePathname()
   const router = useRouter()
 
+  const [imgError, setImgError] = React.useState(false)
+
   const handleLogout = async () => {
     const supabase = createSupabaseBrowserClient()
     await supabase.auth.signOut()
@@ -57,7 +60,7 @@ export function AppSidebar({
       className={`
         fixed top-0 left-0 h-screen z-30
         flex flex-col
-        bg-white/60 backdrop-blur-xl border-r border-white/40
+        bg-[var(--bg-sidebar)] border-r border-[var(--border-light)]
         transition-all duration-300 ease-[var(--ease-out)]
         ${collapsed ? "w-[72px]" : "w-[260px]"}
       `}
@@ -66,16 +69,15 @@ export function AppSidebar({
       <div className="h-16 flex items-center gap-3 px-5 border-b border-white/30 shrink-0">
         <div
           className="
-            flex h-9 w-9 shrink-0 items-center justify-center rounded-xl
-            bg-gradient-to-br from-[var(--accent-700)] to-[var(--accent-950)]
-            shadow-[var(--shadow-xs)]
+            flex h-8 w-8 shrink-0 items-center justify-center rounded-lg
+            bg-[var(--accent-400)]
           "
         >
           <Utensils className="h-4 w-4 text-white" />
         </div>
         <span
           className={`
-            text-[16px] font-bold tracking-tight text-[var(--text-primary)]
+            text-[20px] font-semibold tracking-tight text-[var(--text-primary)]
             transition-all duration-300
             ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"}
           `}
@@ -108,7 +110,7 @@ export function AppSidebar({
                 ${collapsed ? "justify-center" : ""}
                 ${
                   isActive
-                    ? "bg-gradient-to-r from-[var(--accent-800)] to-[var(--accent-950)] text-white shadow-[var(--shadow-xs)]"
+                    ? "bg-[var(--text-primary)] text-white shadow-sm"
                     : "text-[var(--text-secondary)] hover:bg-[var(--accent-50)] hover:text-[var(--accent-900)]"
                 }
               `}
@@ -123,10 +125,7 @@ export function AppSidebar({
               >
                 {item.title}
               </span>
-              {/* Active glow */}
-              {isActive && (
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/5 to-transparent pointer-events-none" />
-              )}
+              {/* Removed Active glow */}
             </Link>
           )
         })}
@@ -137,16 +136,21 @@ export function AppSidebar({
         <div className="border-t border-white/30 px-3 py-4 space-y-2">
           <div className={`flex items-center gap-3 px-3 ${collapsed ? "justify-center" : ""}`}>
             {/* Avatar */}
-            {user.avatarUrl ? (
-              <img
+            {user.avatarUrl && !imgError ? (
+              <Image
                 src={user.avatarUrl}
                 alt="Avatar"
+                width={32}
+                height={32}
+                unoptimized
+                referrerPolicy="no-referrer"
+                onError={() => setImgError(true)}
                 className="h-8 w-8 rounded-lg object-cover shrink-0"
               />
             ) : (
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[var(--accent-200)] to-[var(--accent-400)]
+              <div className="h-8 w-8 rounded-lg bg-[var(--accent-100)]
                 flex items-center justify-center shrink-0">
-                <span className="text-[11px] font-bold text-white">{initials}</span>
+                <span className="text-[11px] font-bold text-[var(--accent-800)]">{initials}</span>
               </div>
             )}
             <div
