@@ -151,10 +151,10 @@ export function MealPlannerForm({ onGenerate, isLoading }: MealPlannerFormProps)
 
       <button type="submit" disabled={isLoading} className="
               inline-flex items-center gap-2 h-11 px-6
-              bg-gradient-to-r from-[var(--accent-700)] to-[var(--accent-900)]
-              text-white text-[13px] font-semibold rounded-xl
-              shadow-[var(--shadow-sm)]
-              hover:shadow-[var(--shadow-glow),var(--shadow-md)] hover:-translate-y-0.5
+              bg-[var(--accent-400)]
+              text-white text-[14px] font-medium rounded-full
+              shadow-sm
+              hover:bg-[var(--accent-500)] hover:-translate-y-0.5 hover:shadow-md
               transition-all duration-250 ease-[var(--ease-out)]"
           >
         {isLoading ? (
